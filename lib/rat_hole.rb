@@ -4,12 +4,6 @@ require 'rack'
 require 'hpricot'
 require 'delegate'
 
-class SocketSpy < SimpleDelegator
-  def write(content)
-    p :writing => content
-    # __getobj__.write content
-  end
-end
 # 
 # Net::HTTPHeader.class_eval do
 #   # handle multiple parameters with the same name
@@ -32,10 +26,10 @@ class RatHole
   
   def call(env)
     Net::HTTP.start(@ip) do |http|
-      # http.instance_eval{@socket = SocketSpy.new(@socket)}
+      http.instance_eval{@socket = SocketSpy.new(@socket)}
+      
       response = http.get('/request', {})
+      [response.code.to_i, response.to_hash, response.body]
     end
-    
-    [0, {}, '']
   end
 end

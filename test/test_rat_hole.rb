@@ -1,49 +1,45 @@
 require 'rubygems'
 require 'rr'
-require 'ruby-debug'
+require 'delegate'
 
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'test/unit'
 require 'rat_hole'
 
+class SocketSpy < SimpleDelegator
+  def write(content)
+    p :writing => content
+    __getobj__.write content
+  end
 
-require 'rubygems'
-require 'rack'
-
-class StubServer
-  attr_writer :body
-  def call(env)
-    [200, {"Content-Type" => "text/html"}, @body]
+  def readline
+    content = __getobj__.readline
+    p :reading => content
+    content
   end
 end
 
-old_school_server = StubServer.new
-old_school_server.body = "bird is the old word"
+class Test::Unit::TestCase
+  include RR::Adapters::TestUnit
+end
 
-foo = Rack::Handler::Mongrel.run old_school_server, :Port => 9292
-foo.close
-p "non blocking call"
+def mock_server(host, code, body)
+  io = StringIO.new(%(HTTP/1.1 #{code} OK\r\n\r\n#{body}))
+  class << io
+    def write(content)
+      0
+    end
+  end
 
-old_school_server.body = "<h3>bird is the word</h3>"
+  mock(TCPSocket).open(host, 80) { io }
+end
 
 class TestRatHole < Test::Unit::TestCase
-  include RR::Adapters::TestUnit
-  
-  def test_passes_unmodified_response
-    expected_body = "some string"
-    actual_response = Net::HTTPResponse.new('1.1', '200', "OK")
-    Net::HTTPResponse.class_eval do
-      @body = expected_body
-    end
-    
-    Net::HTTP.class_eval do
-      def connect; end
-    end
-    source_headers = {}
-    # mock(Net::HTTP).connect
-    mock(Net::HTTP).get('/request', source_headers) { actual_response }
+  def test_response_unchanged
+    expected_body = 'the body'
+    mock_server('127.0.0.1', 200, expected_body)
+
     rh = RatHole.new('127.0.0.1')
-    
     env = {}
     result = rh.call(env)
 
@@ -51,11 +47,5 @@ class TestRatHole < Test::Unit::TestCase
     assert_equal 200, result[0]
     assert_equal expected_headers, result[1]
     assert_equal expected_body, result[2]
-    
-    # create rathole
-    # request from new site url
-    # assert response is the same as the old school url response
-    # spoof response
-    # assert response is unchanged
   end
 end
