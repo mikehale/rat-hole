@@ -20,14 +20,14 @@ class SocketSpy < SimpleDelegator
   end
 end
 
-class MyStringIO < StringIO
-  def write(content)
-    0
-  end
-end
-
 def mock_server(host, port, code, body)
-  io = MyStringIO.new(%(HTTP/1.1 #{code} OK\r\n\r\n#{body}))
+  io = StringIO.new(%(HTTP/1.1 #{code} OK\r\n\r\n#{body}))
+  class << io
+    def write(content)
+      0
+    end
+  end
+  
   mock(TCPSocket).open(host, port) { io }
 end
 
@@ -37,7 +37,7 @@ class TestRatHole < Test::Unit::TestCase
     mock_server('127.0.0.1', 80, 200, 'the body')
 
     Net::HTTP.start('127.0.0.1') do |http|
-      http.instance_eval{@socket = SocketSpy.new(@socket)}
+      # http.instance_eval{@socket = SocketSpy.new(@socket)}
       response = http.get('/', {})
       assert_equal 'the body', response.body
     end
