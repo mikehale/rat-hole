@@ -1,9 +1,10 @@
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+
 require 'rubygems'
 require 'rr'
 require 'delegate'
-
-$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'test/unit'
+require 'ruby-debug'
 require 'rat_hole'
 
 class SocketSpy < SimpleDelegator
@@ -11,11 +12,25 @@ class SocketSpy < SimpleDelegator
     p :writing => content
     __getobj__.write content
   end
+  
+  [:readline, :readuntil, :read_all, :read].each{|symbol|
+    define_method(symbol) do |*args|
+      content = __getobj__.send(symbol, *args)
+      p :reading => content
+      content
+    end
+  }
+end
 
-  def readline
-    content = __getobj__.readline
-    p :reading => content
-    content
+class MethodSpy
+  def initialize(delegate)
+    @delegate = delegate
+  end
+  
+  def method_missing(symbol, *args, &block)
+    result = @delegate.send(symbol, *args, &block)
+    p [symbol, args, result, block]
+    result
   end
 end
 
