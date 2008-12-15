@@ -26,9 +26,16 @@ class RatHole
   
   def call(env)
     Net::HTTP.start(@ip) do |http|
-      http.instance_eval{@socket = SocketSpy.new(@socket)}
-      
-      response = http.get('/request', {})
+      # http.instance_eval{@socket = SocketSpy.new(@socket)}
+
+      source_headers = {}
+      # env.select{|k,v| k =~ /^HTTP/}.each do |k, v|
+      #   next if k =~ /^rack/i
+      #   key = k.split(/_/)[1..-1].collect{|e| e.capitalize}.join('-')
+      #   source_headers[key] = v
+      # end
+
+      response = http.get(env['REQUEST_URI'], source_headers)
       [response.code.to_i, response.to_hash, response.body]
     end
   end

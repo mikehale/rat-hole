@@ -38,8 +38,25 @@ class Test::Unit::TestCase
   include RR::Adapters::TestUnit
 end
 
-def mock_server(host, code, body)
-  io = StringIO.new(%(HTTP/1.1 #{code} OK\r\n\r\n#{body}))
+def mock_server(opts={})
+  host =  opts[:host] || '127.0.0.1'
+  code =  opts[:code] || 200
+  headers =  opts[:headers] || {}
+  body =  opts[:body] || ''
+
+  response = [%(HTTP/1.1 #{code} OK)]
+  headers.each{|k,vs|
+    response << if vs.is_a?(Array)
+      vs.map{|v| "#{k.to_s}: #{v.to_s}" }
+    else
+      "#{k.to_s}: #{vs.to_s}"
+    end
+  }
+  response << ''
+  response << %(#{body})
+  response = response.join("\r\n")
+
+  io = StringIO.new(response)
   class << io
     def write(content)
       0
@@ -52,13 +69,13 @@ end
 class TestRatHole < Test::Unit::TestCase
   def test_response_unchanged
     expected_body = 'the body'
-    mock_server('127.0.0.1', 200, expected_body)
+    expected_headers = {'server' => ['apache']}
+    mock_server(:body => expected_body, :headers => expected_headers)
 
     rh = RatHole.new('127.0.0.1')
-    env = {}
+    env = {'REQUEST_URI' => '/request'}
     result = rh.call(env)
 
-    expected_headers = {}
     assert_equal 200, result[0]
     assert_equal expected_headers, result[1]
     assert_equal expected_body, result[2]
