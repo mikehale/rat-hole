@@ -26,16 +26,9 @@ class RatHole
   
   def call(env)
     Net::HTTP.start(@ip) do |http|
-      # http.instance_eval{@socket = SocketSpy.new(@socket)}
+      # http.instance_eval{@socket = MethodSpy.new(@socket)}
 
-      source_headers = {}
-      # env.select{|k,v| k =~ /^HTTP/}.each do |k, v|
-      #   next if k =~ /^rack/i
-      #   key = k.split(/_/)[1..-1].collect{|e| e.capitalize}.join('-')
-      #   source_headers[key] = v
-      # end
-
-      response = http.get(env['REQUEST_URI'], source_headers)
+      response = http.get(env['REQUEST_URI'], request_headers(env))
       code = response.code.to_i
       headers = camel_case_keys(response.to_hash)
       body = response.body
@@ -44,6 +37,15 @@ class RatHole
     end
   end
   
+  def request_headers(env)
+    tmp = {}
+    env.select{|k,v| k =~ /^HTTP/}.each do |k, v|
+      key = k.split(/_/)[1..-1].collect{|e| e.capitalize}.join('-')
+      tmp[key] = v
+    end
+    tmp
+  end
+
   def camel_case_keys(headers)
     tmp = {}
     headers.each{|k,v|
