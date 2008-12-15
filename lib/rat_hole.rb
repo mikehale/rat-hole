@@ -36,7 +36,19 @@ class RatHole
       # end
 
       response = http.get(env['REQUEST_URI'], source_headers)
-      [response.code.to_i, response.to_hash, response.body]
+      code = response.code.to_i
+      headers = camel_case_keys(response.to_hash)
+      body = response.body
+
+      [code, headers, body]
     end
+  end
+  
+  def camel_case_keys(headers)
+    tmp = {}
+    headers.each{|k,v|
+      tmp[k.gsub(/(^.|-.)/) { $1.upcase }] = v
+    }
+    tmp
   end
 end

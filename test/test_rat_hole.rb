@@ -39,10 +39,10 @@ class Test::Unit::TestCase
 end
 
 def mock_server(opts={})
-  host =  opts[:host] || '127.0.0.1'
-  code =  opts[:code] || 200
+  host = opts[:host] || '127.0.0.1'
+  code = opts[:code] || 200
   headers =  opts[:headers] || {}
-  body =  opts[:body] || ''
+  body = opts[:body] || ''
 
   response = [%(HTTP/1.1 #{code} OK)]
   headers.each{|k,vs|
@@ -67,17 +67,24 @@ def mock_server(opts={})
 end
 
 class TestRatHole < Test::Unit::TestCase
+  def rathole_result
+    rh = RatHole.new('127.0.0.1')
+    env = {'REQUEST_URI' => '/'}
+    rh.call(env)
+  end
+  
   def test_response_unchanged
     expected_body = 'the body'
-    expected_headers = {'server' => ['apache']}
-    mock_server(:body => expected_body, :headers => expected_headers)
-
-    rh = RatHole.new('127.0.0.1')
-    env = {'REQUEST_URI' => '/request'}
-    result = rh.call(env)
+    mock_server(:body => expected_body)
+    result = rathole_result
 
     assert_equal 200, result[0]
-    assert_equal expected_headers, result[1]
     assert_equal expected_body, result[2]
+  end
+  
+  def test_headers_camelcased
+    mock_server(:headers => {'server' => 'freedom-2.0', 'set-cookie' => 'ronpaul=true'})
+    result = rathole_result
+    assert_equal({'Set-Cookie' => ['ronpaul=true'], 'Server' => ['freedom-2.0']}, result[1])
   end
 end
