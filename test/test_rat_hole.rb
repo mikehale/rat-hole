@@ -86,46 +86,8 @@ class TestRatHole < Test::Unit::TestCase
     }
   end
   
-  def rathole_result
-    env = {"SERVER_NAME"=>"localhost", 
-           "rack.url_scheme"=>"http", 
-           "rack.run_once"=>false, 
-           "rack.input"=>'', 
-           "CONTENT_LENGTH"=>nil, 
-           "HTTP_X_FORWARDED_HOST"=>"www.example.com", 
-           "HTTP_ACCEPT_ENCODING"=>"gzip,deflate", 
-           "HTTP_USER_AGENT"=>"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.0.4) Gecko/2008102920 Firefox/3.0.4", 
-           "PATH_INFO"=>"/remote/path/img.gif", 
-           "SCRIPT_NAME"=>"", 
-           "rack.errors"=>'', 
-           "HTTP_CACHE_CONTROL"=>"max-age=0", 
-           "HTTP_IF_NONE_MATCH"=>"\"58dc30c-216-3d878fe2\"-gzip", 
-           "HTTP_ACCEPT_LANGUAGE"=>"en-us,en;q=0.5", 
-           "HTTP_HOST"=>"localhost:4001", 
-           "SERVER_ADDR"=>"127.0.0.1", 
-           "SERVER_PROTOCOL"=>"HTTP/1.1", 
-           "REMOTE_ADDR"=>"127.0.0.1", 
-           "SERVER_SOFTWARE"=>"Apache/2.2.9 (Unix) mod_ssl/2.2.9 OpenSSL/0.9.7l DAV/2 proxy_html/3.0.1 Phusion_Passenger/2.0.4", 
-           "HTTP_REFERER"=>"http://www.example.com/posts/", 
-           "rack.multithread"=>false, 
-           "rack.version"=>[0, 1], 
-           "HTTP_COOKIE"=>"cookie1=YWJj; cookie2=ZGVm", 
-           "HTTP_ACCEPT_CHARSET"=>"ISO-8859-1,utf-8;q=0.7,*;q=0.7", 
-           "rack.multiprocess"=>true, 
-           "HTTP_X_FORWARDED_SERVER"=>"www.example.com", 
-           "DOCUMENT_ROOT"=>"/var/www/apps/site/current/public", 
-           "REQUEST_URI"=>"/remote/path/img.gif", 
-           "SERVER_PORT"=>"4001", 
-           "HTTP_IF_MODIFIED_SINCE"=>"Tue, 17 Sep 2002 20:26:10 GMT", 
-           "QUERY_STRING"=>"", 
-           "REMOTE_PORT"=>"59282", 
-           "SERVER_ADMIN"=>"you@example.com", 
-           "_"=>"_", 
-           "HTTP_X_FORWARDED_FOR"=>"127.0.0.1", 
-           "HTTP_ACCEPT"=>"image/png,image/*;q=0.8,*/*;q=0.5", 
-           "HTTP_CONNECTION"=>"Keep-Alive", 
-           "REQUEST_METHOD"=>"GET"}
-
+  def rathole_result(rack_env={})
+    env = {"REQUEST_URI"=>"/remote/path/img.gif"}.merge(rack_env)
     rh = RatHole.new('127.0.0.1')
     rh.call(env)
   end
@@ -151,8 +113,13 @@ class TestRatHole < Test::Unit::TestCase
     assert_equal '', result[2]
   end
   
-  def test_should_transform_and_proxy_headers
+  def test_convert_rack_env_to_http_headers
     mock_server
+    rathole_result({"HTTP_X_FORWARDED_HOST"=>"www.example.com"})
+    assert(forwarded_headers.has_key?('X-Forwarded-Host'))
+  end
+    
+  def test_convert_rack_env_to_http_headers_more_data
     expected_headers = {
      "X-Forwarded-Host"=>"www.example.com", 
      "Accept-Encoding"=>"gzip,deflate", 
@@ -169,8 +136,48 @@ class TestRatHole < Test::Unit::TestCase
      "X-Forwarded-For"=>"127.0.0.1", 
      "Accept"=>"image/png,image/*;q=0.8,*/*;q=0.5", 
      "Connection"=>"Keep-Alive"}
+     
+    rack_env = {"SERVER_NAME"=>"localhost", 
+      "rack.url_scheme"=>"http", 
+      "rack.run_once"=>false, 
+      "rack.input"=>'', 
+      "CONTENT_LENGTH"=>nil, 
+      "HTTP_X_FORWARDED_HOST"=>"www.example.com", 
+      "HTTP_ACCEPT_ENCODING"=>"gzip,deflate", 
+      "HTTP_USER_AGENT"=>"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.0.4) Gecko/2008102920 Firefox/3.0.4", 
+      "PATH_INFO"=>"/remote/path/img.gif", 
+      "SCRIPT_NAME"=>"", 
+      "rack.errors"=>'', 
+      "HTTP_CACHE_CONTROL"=>"max-age=0", 
+      "HTTP_IF_NONE_MATCH"=>"\"58dc30c-216-3d878fe2\"-gzip", 
+      "HTTP_ACCEPT_LANGUAGE"=>"en-us,en;q=0.5", 
+      "HTTP_HOST"=>"localhost:4001", 
+      "SERVER_ADDR"=>"127.0.0.1", 
+      "SERVER_PROTOCOL"=>"HTTP/1.1", 
+      "REMOTE_ADDR"=>"127.0.0.1", 
+      "SERVER_SOFTWARE"=>"Apache/2.2.9 (Unix) mod_ssl/2.2.9 OpenSSL/0.9.7l DAV/2 proxy_html/3.0.1 Phusion_Passenger/2.0.4", 
+      "HTTP_REFERER"=>"http://www.example.com/posts/", 
+      "rack.multithread"=>false, 
+      "rack.version"=>[0, 1], 
+      "HTTP_COOKIE"=>"cookie1=YWJj; cookie2=ZGVm", 
+      "HTTP_ACCEPT_CHARSET"=>"ISO-8859-1,utf-8;q=0.7,*;q=0.7", 
+      "rack.multiprocess"=>true, 
+      "HTTP_X_FORWARDED_SERVER"=>"www.example.com", 
+      "DOCUMENT_ROOT"=>"/var/www/apps/site/current/public", 
+      "REQUEST_URI"=>"/remote/path/img.gif", 
+      "SERVER_PORT"=>"4001", 
+      "HTTP_IF_MODIFIED_SINCE"=>"Tue, 17 Sep 2002 20:26:10 GMT", 
+      "QUERY_STRING"=>"", 
+      "REMOTE_PORT"=>"59282", 
+      "SERVER_ADMIN"=>"you@example.com", 
+      "_"=>"_", 
+      "HTTP_X_FORWARDED_FOR"=>"127.0.0.1", 
+      "HTTP_ACCEPT"=>"image/png,image/*;q=0.8,*/*;q=0.5", 
+      "HTTP_CONNECTION"=>"Keep-Alive", 
+      "REQUEST_METHOD"=>"GET"}
 
-    rathole_result
-    assert_equal(expected_headers, forwarded_headers)
+    mock_server(:body => 'not testing this')
+    rathole_result(rack_env)
+    assert_equal(expected_headers, forwarded_headers)    
   end
 end
