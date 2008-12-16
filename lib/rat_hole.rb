@@ -32,7 +32,7 @@ class RatHole
   
   def call(env)
     Net::HTTP.start(@ip) do |http|
-      # http.instance_eval{@socket = MethodSpy.new(@socket)}
+      # http.instance_eval{@socket = MethodSpy.new(@socket){|symbol|symbol.to_s =~ /write/}}
 
       response = http.get(env['REQUEST_URI'], request_headers(env))
       code = response.code.to_i
