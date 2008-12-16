@@ -4,7 +4,7 @@ require 'rack'
 require 'hpricot'
 require 'delegate'
 
-
+# TODO don't clobber everyone's net::http
 Net::HTTPHeader.class_eval do
   # handle multiple parameters with the same name
   def form_data=(params, sep = '&')
