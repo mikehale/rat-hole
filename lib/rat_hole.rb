@@ -8,14 +8,18 @@ require 'delegate'
 Net::HTTPHeader.class_eval do
   # handle multiple parameters with the same name
   def form_data=(params, sep = '&')
-    self.body = params.map {|k,vs|
-      if vs.is_a?(Array)
-        vs.map{|v| "#{k.to_s}=#{v.to_s}" }
+    self.body = params.map {|key,value|
+      if value.is_a?(Array)
+        value.map{|v| param_line(key, v) }
       else
-        "#{k.to_s}=#{vs.to_s}"
+        param_line(key, value)
       end
     }.join(sep)
     # self.content_type = 'application/x-www-form-urlencoded'
+  end
+  
+  def param_line(k, v)
+    "#{k.to_s}=#{v.to_s}"
   end
 end
 
