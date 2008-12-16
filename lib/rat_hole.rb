@@ -4,20 +4,20 @@ require 'rack'
 require 'hpricot'
 require 'delegate'
 
-# 
-# Net::HTTPHeader.class_eval do
-#   # handle multiple parameters with the same name
-#   def form_data=(params, sep = '&')
-#     self.body = params.map {|k,vs|
-#       if vs.is_a?(Array)
-#         vs.map{|v| "#{urlencode(k.to_s)}=#{urlencode(v.to_s)}" }
-#       else
-#         "#{urlencode(k.to_s)}=#{urlencode(vs.to_s)}"
-#       end
-#     }.join(sep)
-#     self.content_type = 'application/x-www-form-urlencoded'
-#   end
-# end
+
+Net::HTTPHeader.class_eval do
+  # handle multiple parameters with the same name
+  def form_data=(params, sep = '&')
+    self.body = params.map {|k,vs|
+      if vs.is_a?(Array)
+        vs.map{|v| "#{k.to_s}=#{v.to_s}" }
+      else
+        "#{k.to_s}=#{vs.to_s}"
+      end
+    }.join(sep)
+    # self.content_type = 'application/x-www-form-urlencoded'
+  end
+end
 
 class String
   def to_camel_case(split_on='-')

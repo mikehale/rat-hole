@@ -146,6 +146,12 @@ def test_post_request
   assert request_body.include?("field1=value1")
 end
 
+def test_post_duplicate_keys
+  mock_server
+  send_post_request({}, "field1=value1\r\nfield1=value2")
+  assert request_body.include?("field1=value1\r\nfield1=value2")
+end
+
 def test_convert_rack_env_to_http_headers_more_data
   expected_headers = {
     "X-Forwarded-Host"=>"www.example.com",
