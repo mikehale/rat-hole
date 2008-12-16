@@ -33,16 +33,24 @@ class RatHole
     @ip = ip
   end
 
+  def process_user_request(rack_request)
+    rack_request
+  end
+
+  def process_server_response(rack_response)
+    rack_response
+  end
+
   def call(env)
     Net::HTTP.start(@ip) do |http|
       # http.instance_eval{@socket = MethodSpy.new(@socket){|symbol|symbol.to_s =~ /write/}}
-      source_request = Rack::Request.new(env)
-      source_headers = request_headers(env)
+      source_request = process_user_request(Rack::Request.new(env))
+      source_headers = request_headers(source_request.env)
 
       if source_request.get?
-        response = http.get(env['REQUEST_URI'], source_headers)
+        response = http.get(source_request.env['REQUEST_URI'], source_headers)
       elsif source_request.post?
-        post = Net::HTTP::Post.new(env['REQUEST_URI'], source_headers)
+        post = Net::HTTP::Post.new(source_request.env['REQUEST_URI'], source_headers)
         post.form_data = source_request.POST
         response = http.request(post)
       end
@@ -51,7 +59,7 @@ class RatHole
       headers = camel_case_keys(response.to_hash)
       body = response.body
 
-      [code, headers, body]
+      process_server_response(Rack::Response.new(body, code, headers)).finish
     end
   end
 

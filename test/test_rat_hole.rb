@@ -112,19 +112,20 @@ class TestRatHole < Test::Unit::TestCase
     result = send_get_request
 
     assert_equal 200, result[0]
-    assert_equal expected_body, result[2]
+    assert_equal [expected_body], result[2].body
   end
 
   def test_headers_camelcased
     mock_server(:headers => {'server' => 'freedom-2.0', 'set-cookie' => 'ronpaul=true'})
     result = send_get_request
-    assert_equal({'Set-Cookie' => ['ronpaul=true'], 'Server' => ['freedom-2.0']}, result[1])
+    assert_equal(['ronpaul=true'], result[1]['Set-Cookie'])
+    assert_equal(['freedom-2.0'], result[1]['Server'])
   end
 
   def test_default_body
     mock_server(:body => nil)
     result = send_get_request
-    assert_equal '', result[2]
+    assert_equal [''], result[2].body
   end
 
   def test_convert_rack_env_to_http_headers
