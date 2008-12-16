@@ -77,12 +77,10 @@ class TestRatHole < Test::Unit::TestCase
   
   def forwarded_headers
     #TODO: might not work with posting
-    tmp = {}
-    @io.written.split("\r\n")[1..-1].each{|e|
+    @io.written.split("\r\n")[1..-1].inject({}){|h,e|
       k,v = e.split(': ')
-      tmp[k]=v
+      h.merge k => v
     }
-    tmp
   end
   
   def rathole_result

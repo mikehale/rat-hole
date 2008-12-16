@@ -19,6 +19,12 @@ require 'delegate'
 #   end
 # end
 
+class String
+  def to_camel_case(split_on='-')
+    self.split(split_on).collect{|e| e.capitalize}.join(split_on)
+  end
+end
+
 class RatHole
   def initialize(ip)
     @ip = ip
@@ -38,19 +44,16 @@ class RatHole
   end
   
   def request_headers(env)
-    tmp = {}
-    env.select{|k,v| k =~ /^HTTP/}.each do |k, v|
-      key = k.split(/_/)[1..-1].collect{|e| e.capitalize}.join('-')
-      tmp[key] = v
+    env.select{|k,v| k =~ /^HTTP/}.inject({}) do |h, e|
+      k,v = e
+      h.merge(k.split('_')[1..-1].join('-').to_camel_case => v)
     end
-    tmp
   end
 
   def camel_case_keys(headers)
-    tmp = {}
-    headers.each{|k,v|
-      tmp[k.gsub(/(^.|-.)/) { $1.upcase }] = v
+    headers.inject({}){|h,e|
+      k,v=e
+      h.merge(k.to_camel_case => v)
     }
-    tmp
   end
 end
