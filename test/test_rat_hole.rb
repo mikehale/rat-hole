@@ -167,7 +167,7 @@ class TestRatHole < Test::Unit::TestCase
      "Accept"=>"image/png,image/*;q=0.8,*/*;q=0.5", 
      "Connection"=>"Keep-Alive"}
 
-    result = rathole_result
+    rathole_result
     assert_equal(expected_headers, forwarded_headers)
   end
 end
