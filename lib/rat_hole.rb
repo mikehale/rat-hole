@@ -17,9 +17,9 @@ Net::HTTPHeader.class_eval do
     }.join(sep)
     # self.content_type = 'application/x-www-form-urlencoded'
   end
-  
+
   def param_line(k, v)
-    "#{k.to_s}=#{v.to_s}"
+    "#{urlencode(k.to_s)}=#{urlencode(v.to_s)}"
   end
 end
 
@@ -33,40 +33,40 @@ class RatHole
   def initialize(ip)
     @ip = ip
   end
-  
+
   def call(env)
     Net::HTTP.start(@ip) do |http|
       # http.instance_eval{@socket = MethodSpy.new(@socket){|symbol|symbol.to_s =~ /write/}}
       source_request = Rack::Request.new(env)
       source_headers = request_headers(env)
-      
+
       response = if source_request.get?
-        http.get(env['REQUEST_URI'], source_headers)
-      elsif source_request.post?
-        post = Net::HTTP::Post.new(env['REQUEST_URI'], source_headers)
-        post.form_data = source_request.POST
-        http.request(post)
-      end
-
-      code = response.code.to_i
-      headers = camel_case_keys(response.to_hash)
-      body = response.body
-
-      [code, headers, body]
+      http.get(env['REQUEST_URI'], source_headers)
+    elsif source_request.post?
+      post = Net::HTTP::Post.new(env['REQUEST_URI'], source_headers)
+      post.form_data = source_request.POST
+      http.request(post)
     end
-  end
-  
-  def request_headers(env)
-    env.select{|k,v| k =~ /^HTTP/}.inject({}) do |h, e|
-      k,v = e
-      h.merge(k.split('_')[1..-1].join('-').to_camel_case => v)
-    end
-  end
 
-  def camel_case_keys(headers)
-    headers.inject({}){|h,e|
-      k,v=e
-      h.merge(k.to_camel_case => v)
-    }
+    code = response.code.to_i
+    headers = camel_case_keys(response.to_hash)
+    body = response.body
+
+    [code, headers, body]
   end
+end
+
+def request_headers(env)
+  env.select{|k,v| k =~ /^HTTP/}.inject({}) do |h, e|
+    k,v = e
+    h.merge(k.split('_')[1..-1].join('-').to_camel_case => v)
+  end
+end
+
+def camel_case_keys(headers)
+  headers.inject({}){|h,e|
+    k,v=e
+    h.merge(k.to_camel_case => v)
+  }
+end
 end
