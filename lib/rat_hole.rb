@@ -43,7 +43,8 @@ class RatHole
 
   def call(env)
     Net::HTTP.start(@ip) do |http|
-      # http.instance_eval{@socket = MethodSpy.new(@socket){|symbol|symbol.to_s =~ /write/}}
+      http.instance_eval{@socket = MethodSpy.new(@socket){|symbol|symbol.to_s =~ /write/}} if $DEBUG
+
       source_request = process_user_request(Rack::Request.new(env))
       source_headers = request_headers(source_request.env)
 
@@ -56,7 +57,7 @@ class RatHole
       end
 
       code = response.code.to_i
-      headers = camel_case_keys(response.to_hash)
+      headers = response.to_hash
       body = response.body
 
       process_server_response(Rack::Response.new(body, code, headers)).finish
@@ -68,12 +69,5 @@ class RatHole
       k,v = e
       h.merge(k.split('_')[1..-1].join('-').to_camel_case => v)
     end
-  end
-
-  def camel_case_keys(headers)
-    headers.inject({}){|h,e|
-      k,v=e
-      h.merge(k.to_camel_case => v)
-    }
   end
 end

@@ -115,7 +115,7 @@ class TestRatHole < Test::Unit::TestCase
     assert_equal [expected_body], result[2].body
   end
 
-  def test_headers_camelcased
+  def test_headers_normalized
     mock_server(:headers => {'server' => 'freedom-2.0', 'set-cookie' => 'ronpaul=true'})
     result = send_get_request
     assert_equal(['ronpaul=true'], result[1]['Set-Cookie'])
