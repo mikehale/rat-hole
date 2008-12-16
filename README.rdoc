@@ -1,0 +1,28 @@
+Rat Hole is a handy class for creating a rack compliant http_proxy that allows you to modify the request or response
+
+== Usage
+  require 'rack'
+
+  class MyRatHole < RatHole
+    def process_user_request(rack_request)
+      rack_request
+    end
+
+    def process_server_response(rack_response)
+      rack_response
+    end
+  end
+
+  app =  MyRatHole.new('some.ip')
+  Rack::Handler::Mongrel.run(app, {:Host => 'localhost', :Port => 4001})
+
+== How it Works
+  USER Request  --->
+      ---  RatHoleProxy.process_user_request(rack_request) --->
+                                                                <==========> OLD SERVER
+      <---  RatHoleProxy.process_server_response(rack_response) ---
+  User Response  <---
+
+== Credits
+Michael Hale (http://halethegeek.com)
+David Bogus
