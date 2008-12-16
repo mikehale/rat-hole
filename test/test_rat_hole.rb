@@ -77,7 +77,12 @@ class TestRatHole < Test::Unit::TestCase
   
   def forwarded_headers
     #TODO: might not work with posting
-    @io.written.split("\r\n")[1..-1]
+    tmp = {}
+    @io.written.split("\r\n")[1..-1].each{|e|
+      k,v = e.split(': ')
+      tmp[k]=v
+    }
+    tmp
   end
   
   def rathole_result
@@ -165,6 +170,6 @@ class TestRatHole < Test::Unit::TestCase
      "Connection"=>"Keep-Alive"}
 
     result = rathole_result
-    assert_equal(expected_headers.sort, forwarded_headers.sort)
+    assert_equal(expected_headers, forwarded_headers)
   end
 end
