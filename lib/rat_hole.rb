@@ -15,7 +15,6 @@ Net::HTTPHeader.class_eval do
         param_line(key, value)
       end
     }.join(sep)
-    # self.content_type = 'application/x-www-form-urlencoded'
   end
 
   def param_line(k, v)
@@ -40,33 +39,33 @@ class RatHole
       source_request = Rack::Request.new(env)
       source_headers = request_headers(env)
 
-      response = if source_request.get?
-      http.get(env['REQUEST_URI'], source_headers)
-    elsif source_request.post?
-      post = Net::HTTP::Post.new(env['REQUEST_URI'], source_headers)
-      post.form_data = source_request.POST
-      http.request(post)
+      if source_request.get?
+        response = http.get(env['REQUEST_URI'], source_headers)
+      elsif source_request.post?
+        post = Net::HTTP::Post.new(env['REQUEST_URI'], source_headers)
+        post.form_data = source_request.POST
+        response = http.request(post)
+      end
+
+      code = response.code.to_i
+      headers = camel_case_keys(response.to_hash)
+      body = response.body
+
+      [code, headers, body]
     end
-
-    code = response.code.to_i
-    headers = camel_case_keys(response.to_hash)
-    body = response.body
-
-    [code, headers, body]
   end
-end
 
-def request_headers(env)
-  env.select{|k,v| k =~ /^HTTP/}.inject({}) do |h, e|
-    k,v = e
-    h.merge(k.split('_')[1..-1].join('-').to_camel_case => v)
+  def request_headers(env)
+    env.select{|k,v| k =~ /^HTTP/}.inject({}) do |h, e|
+      k,v = e
+      h.merge(k.split('_')[1..-1].join('-').to_camel_case => v)
+    end
   end
-end
 
-def camel_case_keys(headers)
-  headers.inject({}){|h,e|
-    k,v=e
-    h.merge(k.to_camel_case => v)
-  }
-end
+  def camel_case_keys(headers)
+    headers.inject({}){|h,e|
+      k,v=e
+      h.merge(k.to_camel_case => v)
+    }
+  end
 end
