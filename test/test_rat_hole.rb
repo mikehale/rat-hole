@@ -41,10 +41,6 @@ class Test::Unit::TestCase
   include RR::Adapters::TestUnit
 end
 
-Net::HTTPHeader.module_eval do
-  module_function :urlencode
-end
-
 class TestRatHole < Test::Unit::TestCase
   def mock_server(opts={})
     opts[:host] = opts[:host] || '127.0.0.1'
@@ -141,11 +137,6 @@ def test_get_request
   mock_server
   send_get_request
   assert_equal 'GET', request_line.split(' ').first
-end
-
-# TODO: should we be doing this? maybe we should assert against a known string instead.
-def urlencode(str)
-  Net::HTTPHeader.urlencode(str)
 end
 
 def test_post_request
