@@ -2,19 +2,41 @@ Rat Hole is a handy class for creating a rack compliant http_proxy that allows y
 
 == Usage
   require 'rat_hole'
+  require 'hpricot'
 
-  class MyRatHole < RatHole
+  class PoliticalAgendaRatHole < RatHole
     def process_user_request(rack_request)
+      # optionally munge the request before passing it to the old server
+      
+      # required to return the rack request
       rack_request
     end
 
     def process_server_response(rack_response)
+      # For any html pages proxied replace all links with http://ronpaul.com and 
+      # add a Ron-Paul header.
+
+      if(rack_response.content_type == 'text/html')
+
+        # dump the body into hpricot so we can use hpricot's search/replace goodness
+        doc = Hpricot(rack_response.body.first)
+
+        # update all links to help spread our political views
+        (doc/"a").set('href', 'http://ronpaul.com')
+
+        # update the original string with our modified html
+        rack_response.body.first.replace(doc.to_html)
+
+        rack_response.headers['Ron-Paul'] = 'wish I could have voted for this guy'
+      end
+
+      # required to return the rack response
       rack_response
     end
   end
 
-  app =  MyRatHole.new('some.ip')
-  Rack::Handler::Mongrel.run(app, {:Host => 'localhost', :Port => 4001})
+  app =  PoliticalAgendaRatHole.new('www.google.com')
+  Rack::Handler::Mongrel.run(app, {:Host => 'localhost', :Port => 5001})
 
 == How it Works
   USER Request  --->

@@ -1,7 +1,6 @@
 require 'net/http'
 require 'rubygems'
 require 'rack'
-require 'hpricot'
 require 'delegate'
 require 'util'
 
@@ -19,12 +18,6 @@ Net::HTTPHeader.class_eval do
 
   def param_line(k, v)
     "#{urlencode(k.to_s)}=#{urlencode(v.to_s)}"
-  end
-end
-
-class String
-  def to_camel_case(split_on='-')
-    self.split(split_on).collect{|e| e.capitalize}.join(split_on)
   end
 end
 

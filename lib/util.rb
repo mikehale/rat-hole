@@ -26,3 +26,9 @@ class MethodSpy
     result
   end
 end
+
+class String
+  def to_camel_case(split_on='-')
+    self.split(split_on).collect{|e| e.capitalize}.join(split_on)
+  end
+end

@@ -7,6 +7,7 @@ require 'test/unit'
 require 'ruby-debug'
 require 'rat_hole'
 require 'mock_request'
+require 'hpricot'
 
 class Test::Unit::TestCase
   include RR::Adapters::TestUnit
@@ -208,27 +209,13 @@ class TestRatHole < Test::Unit::TestCase
 end
 
 class PoliticalAgendaRatHole < RatHole
-  def process_user_request(rack_request)
-    # required to return the rack request
-    rack_request
-  end
-
   def process_server_response(rack_response)
     if(rack_response.content_type == 'text/html')
-
-      # dump the body into hpricot so we can use hpricot's search/replace goodness
       doc = Hpricot(rack_response.body.first)
-
-      # update all links to help spread our political views
       (doc/"a").set('href', 'http://ronpaul.com')
-
-      # update the original string with our modified html
       rack_response.body.first.replace(doc.to_html)
-
       rack_response.headers['Ron-Paul'] = 'wish I could have voted for this guy'
     end
-
-    # required to return the rack response
     rack_response
   end
 end
