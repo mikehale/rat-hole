@@ -46,6 +46,9 @@ You can also modify the response from the server to cleanup html tweak headers e
   app =  PoliticalAgendaRatHole.new('www.google.com')
   Rack::Handler::Mongrel.run(app, {:Host => 'localhost', :Port => 5001})
 
+== INSTALL:
+  * sudo gem install mikehale-rat-hole
+
 == How it Works
   User Request  --->
       ---  RatHoleProxy.process_user_request(rack_request) --->

@@ -5,6 +5,9 @@ require 'delegate'
 require 'util'
 
 class RatHole
+
+  VERSION = '0.1.0'
+
   def initialize(host)
     @host = host
   end
