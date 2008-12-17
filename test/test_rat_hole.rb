@@ -98,14 +98,14 @@ class TestRatHole < Test::Unit::TestCase
   end
 
   def send_get_request(rack_env={})
-    opts = {:lint=>false}.merge(rack_env)
+    opts = {:lint=>true}.merge(rack_env)
     rh = RatHole.new('127.0.0.1')
     Rack::MockRequest.new(rh).get('/someuri', opts)
   end
 
   def send_post_request(body='')
     rh = RatHole.new('127.0.0.1')
-    Rack::MockRequest.new(rh).post('/someuri', {:lint=>false, :input=> body})
+    Rack::MockRequest.new(rh).post('/someuri', {:lint=>true, :input=> body})
   end
 
   def test_response_unchanged
