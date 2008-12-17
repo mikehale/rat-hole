@@ -29,8 +29,8 @@ class String
 end
 
 class RatHole
-  def initialize(ip)
-    @ip = ip
+  def initialize(host)
+    @host = host
   end
 
   def process_user_request(rack_request)
@@ -42,9 +42,10 @@ class RatHole
   end
 
   def call(env)
-    Net::HTTP.start(@ip) do |http|
-      http.instance_eval{@socket = MethodSpy.new(@socket){|symbol|symbol.to_s =~ /write/}} if $DEBUG
+    Net::HTTP.start(@host) do |http|
+      http.instance_eval{@socket = MethodSpy.new(@socket){|method| method =~ /write/}} if $DEBUG
 
+      env.delete('HTTP_ACCEPT_ENCODING')
       source_request = process_user_request(Rack::Request.new(env))
       source_headers = request_headers(source_request.env)
 
@@ -58,7 +59,8 @@ class RatHole
 
       code = response.code.to_i
       headers = response.to_hash
-      body = response.body
+      body = response.body || ''
+      headers.delete('transfer-encoding')
 
       process_server_response(Rack::Response.new(body, code, headers)).finish
     end
@@ -70,4 +72,9 @@ class RatHole
       h.merge(k.split('_')[1..-1].join('-').to_camel_case => v)
     end
   end
+end
+
+# This class simply extends RatHole and does nothing. 
+# It's only useful for making sure that you have everything hooked up correctly.
+class EmptyRatHole < RatHole
 end

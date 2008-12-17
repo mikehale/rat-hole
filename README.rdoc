@@ -1,7 +1,7 @@
 Rat Hole is a handy class for creating a rack compliant http_proxy that allows you to modify the request or response
 
 == Usage
-  require 'rack'
+  require 'rat_hole'
 
   class MyRatHole < RatHole
     def process_user_request(rack_request)
@@ -26,7 +26,7 @@ Rat Hole is a handy class for creating a rack compliant http_proxy that allows y
 == TODO
 * don't clobber everyone's net::http
 * add error handling
-* systemic tests
+* handle gziped content (accept-encoding, transfer-encoding)
 
 == Credits
 * Michael Hale (http://halethegeek.com)

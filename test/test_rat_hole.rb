@@ -123,7 +123,6 @@ class TestRatHole < Test::Unit::TestCase
   def test_convert_rack_env_to_http_headers_more_data
     expected_headers = {
       "X-Forwarded-Host"=>"www.example.com",
-      "Accept-Encoding"=>"gzip,deflate",
       "User-Agent"=>"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.0.4) Gecko/2008102920 Firefox/3.0.4",
       "Cache-Control"=>"max-age=0",
       "If-None-Match"=>"\"58dc30c-216-3d878fe2\"-gzip",
@@ -158,5 +157,78 @@ class TestRatHole < Test::Unit::TestCase
     mock_server(:body => 'not testing this')
     send_get_request(rack_env)
     assert_equal(expected_headers, proxied_request.headers)
+  end
+
+  def test_systemic_empty_rathole
+    host = 'halethegeek.com'
+    app =  EmptyRatHole.new(host)
+    app_response = Rack::MockRequest.new(app).get('/', {})
+    raw_response = Net::HTTP.start(host) do |http|
+      http.get('/', {})
+    end
+    # Wrap raw_response in Rack::Response to make things easier to work with.
+    raw_response = Rack::Response.new(raw_response.body, raw_response.code, raw_response.to_hash)
+
+    assert_equal raw_response.status.to_i, app_response.status.to_i
+    assert_equal normalize_headers(raw_response.headers), normalize_headers(app_response.headers)
+    assert_equal raw_response.body.to_s, app_response.body.to_s
+  end
+
+  def test_systemic_political_agenda
+    host = 'terralien.com'
+    app =  PoliticalAgendaRatHole.new(host)
+    app_response = Rack::MockRequest.new(app).get('/', {})
+    raw_response = Net::HTTP.start(host) do |http|
+      http.get('/', {})
+    end
+    # Wrap raw_response in Rack::Response to make things easier to work with.
+    raw_response = Rack::Response.new(raw_response.body, raw_response.code, raw_response.to_hash)
+    raw_headers = normalize_headers(raw_response.headers)
+    app_headers = normalize_headers(app_response.headers)
+
+    assert_equal raw_response.status.to_i, app_response.status.to_i
+    assert !raw_headers.has_key?('Ron-Paul')
+    assert app_headers.has_key?('Ron-Paul')
+
+    assert !raw_response.body.to_s.include?('http://ronpaul.com')
+    assert app_response.body.to_s.include?('http://ronpaul.com')
+  end
+
+  def normalize_headers(headers)
+    headers.inject({}){|h,e|
+      k,v = e
+      # don't compare headers that change or that we remove
+      unless k =~ /cookie|transfer|date|runtime/i
+        v = [v] unless v.is_a? Array #normalize things
+        h.merge!(k => v)
+      end
+      h
+    }
+  end
+end
+
+class PoliticalAgendaRatHole < RatHole
+  def process_user_request(rack_request)
+    # required to return the rack request
+    rack_request
+  end
+
+  def process_server_response(rack_response)
+    if(rack_response.content_type == 'text/html')
+
+      # dump the body into hpricot so we can use hpricot's search/replace goodness
+      doc = Hpricot(rack_response.body.first)
+
+      # update all links to help spread our political views
+      (doc/"a").set('href', 'http://ronpaul.com')
+
+      # update the original string with our modified html
+      rack_response.body.first.replace(doc.to_html)
+
+      rack_response.headers['Ron-Paul'] = 'wish I could have voted for this guy'
+    end
+
+    # required to return the rack response
+    rack_response
   end
 end
