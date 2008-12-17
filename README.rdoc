@@ -1,4 +1,4 @@
-Rat Hole is a handy class for creating a rack compliant http_proxy that allows you to modify the request or response
+Rat Hole is a handy class for creating a rack compliant http_proxy that allows you to modify the request from the user and response the response from the server.
 
 == Usage
   require 'rat_hole'
@@ -46,9 +46,9 @@ Rat Hole is a handy class for creating a rack compliant http_proxy that allows y
   User Response  <---
 
 == TODO
-* don't clobber everyone's net::http
 * add error handling
 * handle gziped content (accept-encoding, transfer-encoding)
+* maybe use a pool of Net::HTTP connections to speed things up
 
 == Credits
 * Michael Hale (http://halethegeek.com)

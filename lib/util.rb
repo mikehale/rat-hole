@@ -32,3 +32,20 @@ class String
     self.split(split_on).collect{|e| e.capitalize}.join(split_on)
   end
 end
+
+module HTTPHeaderPatch
+  # handle multiple parameters with the same name
+  def form_data=(params, sep = '&')
+    self.body = params.map {|key,value|
+      if value.is_a?(Array)
+        value.map{|v| param_line(key, v) }
+      else
+        param_line(key, value)
+      end
+    }.join(sep)
+  end
+
+  def param_line(k, v)
+    "#{urlencode(k.to_s)}=#{urlencode(v.to_s)}"
+  end
+end
