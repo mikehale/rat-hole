@@ -1,4 +1,12 @@
-Rat Hole is a handy class for creating a rack compliant http_proxy that allows you to modify the request from the user and response the response from the server.
+Rat Hole is a handy class for creating a rack compliant http_proxy that allows you to modify the request from the user and the response from the server. 
+The name is inspired by why's mousehole[http://code.whytheluckystiff.net/mouseHole/]
+
+== Why
+Use Rat Hole to proxy site A into the namespace of site B.
+
+Along the way you can modify the request from the user (example: proxy to an ip and set the Host header to support virtual hosts without DNS).
+
+You can also modify the response from the server to cleanup html tweak headers etc.
 
 == Usage
   require 'rat_hole'
