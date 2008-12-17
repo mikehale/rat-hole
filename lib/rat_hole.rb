@@ -49,9 +49,9 @@ class RatHole
       source_headers = request_headers(source_request.env)
 
       if source_request.get?
-        response = http.get(source_request.env['REQUEST_URI'], source_headers)
+        response = http.get(source_request.path_info, source_headers)
       elsif source_request.post?
-        post = Net::HTTP::Post.new(source_request.env['REQUEST_URI'], source_headers)
+        post = Net::HTTP::Post.new(source_request.path_info, source_headers)
         post.form_data = source_request.POST
         response = http.request(post)
       end
