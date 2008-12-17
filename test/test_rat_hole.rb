@@ -6,72 +6,7 @@ require 'delegate'
 require 'test/unit'
 require 'ruby-debug'
 require 'rat_hole'
-
-class MockRequest
-
-  attr_reader :headers, :body, :uri
-
-  def initialize(request_string)
-    lines = request_string.split("\r\n")
-
-    # find blank line which seperates the headers from the body
-    index_of_blank = nil
-    lines.each_with_index{|e,i|
-      index_of_blank = i if e == ""
-    }
-
-    @type, @uri = lines.first.split(/\s+/)
-    if index_of_blank
-      @headers = lines[1..index_of_blank]
-      @body = lines[(index_of_blank + 1)..-1].first
-    else
-      @headers = lines[1..-1]
-    end
-
-    @headers = @headers.inject({}){|h,e|
-      k,v = e.split(/:\s+/)
-      h.merge k => v
-    }
-  end
-
-  def get?
-    @type == 'GET'
-  end
-
-  def post?
-    @type == 'POST'
-  end
-end
-
-class SocketSpy < SimpleDelegator
-  def write(content)
-    p :writing => content
-    __getobj__.write content
-  end
-
-  [:readline, :readuntil, :read_all, :read].each{|symbol|
-    define_method(symbol) do |*args|
-      content = __getobj__.send(symbol, *args)
-      p :reading => content
-      content
-    end
-  }
-end
-
-class MethodSpy
-  def initialize(delegate, &block)
-    @delegate = delegate
-    @filter = block
-  end
-
-  def method_missing(symbol, *args, &block)
-    result = @delegate.send(symbol, *args, &block)
-    @block.call if @block
-    p [symbol, args, result, block] if @filter && @filter.call(symbol)
-    result
-  end
-
-end
+require 'mock_request'
 
 class Test::Unit::TestCase
   include RR::Adapters::TestUnit
