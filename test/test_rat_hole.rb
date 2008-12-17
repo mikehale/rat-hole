@@ -7,6 +7,42 @@ require 'test/unit'
 require 'ruby-debug'
 require 'rat_hole'
 
+class MockRequest
+
+  attr_reader :headers, :body, :uri
+
+  def initialize(request_string)
+    lines = request_string.split("\r\n")
+
+    # find blank line which seperates the headers from the body
+    index_of_blank = nil
+    lines.each_with_index{|e,i|
+      index_of_blank = i if e == ""
+    }
+
+    @type, @uri = lines.first.split(/\s+/)
+    if index_of_blank
+      @headers = lines[1..index_of_blank]
+      @body = lines[(index_of_blank + 1)..-1].first
+    else
+      @headers = lines[1..-1]
+    end
+
+    @headers = @headers.inject({}){|h,e|
+      k,v = e.split(/:\s+/)
+      h.merge k => v
+    }
+  end
+
+  def get?
+    @type == 'GET'
+  end
+
+  def post?
+    @type == 'POST'
+  end
+end
+
 class SocketSpy < SimpleDelegator
   def write(content)
     p :writing => content
@@ -78,23 +114,8 @@ class TestRatHole < Test::Unit::TestCase
     mock(TCPSocket).open(host, 80) { @io }
   end
 
-  def request
-  end
-
-  def request_line
-    @io.written.split("\r\n").first
-  end
-
-  def request_body
-    @io.written.split("\r\n\r\n")[1]
-  end
-
-  def forwarded_headers
-    #TODO: might not work with posting
-    @io.written.split("\r\n")[1..-1].inject({}){|h,e|
-      k,v = e.split(/:\s/)
-      h.merge k => v
-    }
+  def proxied_request
+    MockRequest.new(@io.written)
   end
 
   def send_get_request(rack_env={})
@@ -111,54 +132,54 @@ class TestRatHole < Test::Unit::TestCase
   def test_response_unchanged
     expected_body = 'the body'
     mock_server(:body => expected_body)
-    result = send_get_request
+    response = send_get_request
 
-    assert_equal 200, result.status
-    assert_equal expected_body, result.body
+    assert_equal 200, response.status
+    assert_equal expected_body, response.body
   end
 
   def test_headers_normalized
     mock_server(:headers => {'server' => 'freedom-2.0', 'set-cookie' => 'ronpaul=true'})
-    result = send_get_request
-    assert_equal('ronpaul=true', result.headers['Set-Cookie'])
-    assert_equal('freedom-2.0', result.headers['Server'])
+    response = send_get_request
+    assert_equal('ronpaul=true', response.headers['Set-Cookie'])
+    assert_equal('freedom-2.0', response.headers['Server'])
   end
 
   def test_default_body
     mock_server(:body => nil)
-    result = send_get_request
-    assert_equal '', result.body
+    response = send_get_request
+    assert_equal '', response.body
   end
 
   def test_convert_rack_env_to_http_headers
     mock_server
     send_get_request({"HTTP_X_FORWARDED_HOST"=>"www.example.com"})
-    assert(forwarded_headers.has_key?('X-Forwarded-Host'))
+    assert(proxied_request.headers.has_key?('X-Forwarded-Host'))
   end
 
   def test_get_request
     mock_server
     send_get_request
-    assert_equal 'GET', request_line.split(' ').first
+    assert proxied_request.get?
   end
 
   def test_post_request
     mock_server
     send_post_request("field1=value1")
-    assert_equal 'POST', request_line.split(' ').first
-    assert request_body.include?("field1=value1")
+    assert proxied_request.post?
+    assert proxied_request.body.include?("field1=value1")
   end
 
   def test_post_duplicate_keys
     mock_server
     send_post_request("field1=value1&field1=value2")
-    assert_equal("field1=value1&field1=value2", request_body)
+    assert_equal("field1=value1&field1=value2", proxied_request.body)
   end
 
   def test_post_data_urlencoded
     mock_server
     send_post_request("field%201=value%201")
-    assert("field%201=value%201", request_body)
+    assert("field%201=value%201", proxied_request.body)
   end
 
   def test_convert_rack_env_to_http_headers_more_data
@@ -198,6 +219,6 @@ class TestRatHole < Test::Unit::TestCase
 
     mock_server(:body => 'not testing this')
     send_get_request(rack_env)
-    assert_equal(expected_headers, forwarded_headers)
+    assert_equal(expected_headers, proxied_request.headers)
   end
 end
