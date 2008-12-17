@@ -47,7 +47,7 @@ You can also modify the response from the server to cleanup html tweak headers e
   Rack::Handler::Mongrel.run(app, {:Host => 'localhost', :Port => 5001})
 
 == How it Works
-  USER Request  --->
+  User Request  --->
       ---  RatHoleProxy.process_user_request(rack_request) --->
                                                                 <==========> OLD SERVER
       <---  RatHoleProxy.process_server_response(rack_response) ---
@@ -57,6 +57,7 @@ You can also modify the response from the server to cleanup html tweak headers e
 * add error handling
 * handle gziped content (accept-encoding, transfer-encoding)
 * maybe use a pool of Net::HTTP connections to speed things up
+* provide an easy way for testing rat holes
 
 == Credits
 * Michael Hale (http://halethegeek.com)
