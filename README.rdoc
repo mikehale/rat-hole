@@ -23,6 +23,11 @@ Rat Hole is a handy class for creating a rack compliant http_proxy that allows y
       <---  RatHoleProxy.process_server_response(rack_response) ---
   User Response  <---
 
+== TODO
+* don't clobber everyone's net::http
+* add error handling
+* systemic tests
+
 == Credits
 * Michael Hale (http://halethegeek.com)
 * David Bogus

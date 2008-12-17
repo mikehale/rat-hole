@@ -86,12 +86,6 @@ class TestRatHole < Test::Unit::TestCase
     assert_equal '', response.body
   end
 
-  def test_convert_rack_env_to_http_headers
-    mock_server
-    send_get_request({"HTTP_X_FORWARDED_HOST"=>"www.example.com"})
-    assert(proxied_request.headers.has_key?('X-Forwarded-Host'))
-  end
-
   def test_get_request
     mock_server
     send_get_request
@@ -115,6 +109,15 @@ class TestRatHole < Test::Unit::TestCase
     mock_server
     send_post_request("field%201=value%201")
     assert("field%201=value%201", proxied_request.body)
+  end
+
+  def test_convert_rack_env_to_http_headers
+    headers_added_by_rack = {"Accept"=>"*/*", "Host"=>"127.0.0.1"}
+    expected_headers = {"X-Forwarded-Host"=>"www.example.com"}.merge(headers_added_by_rack)
+
+    mock_server
+    send_get_request({"HTTP_X_FORWARDED_HOST"=>"www.example.com", "NON_HTTP_HEADER" => '42'})
+    assert_equal(expected_headers, proxied_request.headers)
   end
 
   def test_convert_rack_env_to_http_headers_more_data
