@@ -1,14 +1,14 @@
 Gem::Specification.new do |s|
   s.name = %q{rathole}
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Bogus"]
   s.date = %q{2008-12-17}
-  s.description = %q{Rat Hole is a handy class for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server.  The name is inspired by why's mousehole[http://code.whytheluckystiff.net/mouseHole/]}
+  s.description = %q{Rat Hole is a handy library for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server.  The name is inspired by why's mousehole[http://code.whytheluckystiff.net/mouseHole/]}
   s.email = %q{mikehale@gmail.com}
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.rdoc"]
-  s.files = ["History.txt", "Manifest.txt", "Rakefile", "README.rdoc", "rat-hole.gemspec", "lib/rat_hole.rb", "lib/util.rb", "test/test_rat_hole.rb", "test/mock_request.rb"]
+  s.files = ["History.txt", "Manifest.txt", "README.rdoc", "Rakefile", "lib/rat_hole.rb", "lib/util.rb", "rat-hole.gemspec", "test/mock_request.rb", "test/test_rat_hole.rb"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/mikehale/rat-hole}
   s.rdoc_options = ["--main", "README.rdoc"]
