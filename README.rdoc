@@ -1,4 +1,4 @@
-Rat Hole is a handy class for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server. 
+Rat Hole is a handy library for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server. 
 The name is inspired by why's mousehole[http://code.whytheluckystiff.net/mouseHole/]
 
 == Why
