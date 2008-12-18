@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
-  s.name = %q{rathole}
-  s.version = "0.1.2"
+  s.name = %q{rat-hole}
+  s.version = "0.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Hale", "David Bogus"]
-  s.date = %q{2008-12-17}
+  s.date = %q{2008-12-18}
   s.description = %q{Rat Hole is a handy library for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server.  The name is inspired by why's mousehole[http://code.whytheluckystiff.net/mouseHole/]}
   s.email = %q{mikehale@gmail.com}
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.rdoc"]
@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/mikehale/rat-hole}
   s.rdoc_options = ["--main", "README.rdoc"]
   s.require_paths = ["lib"]
-  s.rubyforge_project = %q{rathole}
+  s.rubyforge_project = %q{rat-hole}
   s.rubygems_version = %q{1.2.0}
   s.summary = %q{Rack compliant proxy}
   s.test_files = ["test/test_rat_hole.rb"]

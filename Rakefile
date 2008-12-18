@@ -3,7 +3,7 @@ require 'rubygems'
 require 'hoe-patched' # because it supports README.*
 require 'rat_hole'
 
-Hoe.new('rathole', RatHole::VERSION) do |p|
+Hoe.new('rat-hole', RatHole::VERSION) do |p|
   p.summary = 'Rack compliant proxy'
   p.description = p.paragraphs_of('README.rdoc', 0...1).to_s
   p.url = 'http://github.com/mikehale/rat-hole'
