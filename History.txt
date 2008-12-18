@@ -1,3 +1,7 @@
+=== 0.1.5 / 2008-12-18
+
+* calculate request_uri = path_info + query_string
+
 === 0.1.4 / 2008-12-18
 
 * update process_server_response hook to include rack_request

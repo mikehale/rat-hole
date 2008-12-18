@@ -21,7 +21,6 @@ class MethodSpy
 
   def method_missing(symbol, *args, &block)
     result = @delegate.send(symbol, *args, &block)
-    @block.call if @block
     p [symbol, args, result, block] if @filter && @filter.call(symbol.to_s)
     result
   end

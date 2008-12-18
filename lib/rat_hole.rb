@@ -6,7 +6,7 @@ require 'util'
 
 class RatHole
 
-  VERSION = '0.1.4'
+  VERSION = '0.1.5'
 
   def initialize(host)
     @host = host
@@ -22,16 +22,17 @@ class RatHole
 
   def call(env)
     Net::HTTP.start(@host) do |http|
-      http.instance_eval{@socket = MethodSpy.new(@socket){|method| method =~ /write/}} if $DEBUG
+      http.instance_eval{@socket = MethodSpy.new(@socket){|method| method =~ /#{ENV['RH_METHOD_SPY_FILTER']}/}} if $DEBUG
 
       env.delete('HTTP_ACCEPT_ENCODING')
       source_request = process_user_request(Rack::Request.new(env))
       source_headers = request_headers(source_request.env)
+      request_uri = "#{source_request.path_info}?#{source_request.query_string}"
 
       if source_request.get?
-        response = http.get(source_request.path_info, source_headers)
+        response = http.get(request_uri, source_headers)
       elsif source_request.post?
-        post = Net::HTTP::Post.new(source_request.path_info, source_headers)
+        post = Net::HTTP::Post.new(request_uri, source_headers)
         class << post
           include HTTPHeaderPatch
         end

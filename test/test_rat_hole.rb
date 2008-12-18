@@ -54,15 +54,15 @@ class TestRatHole < Test::Unit::TestCase
     MockRequest.new(@io.written)
   end
 
-  def send_get_request(rack_env={})
+  def send_get_request(rack_env={}, uri='/someuri')
     opts = {:lint=>true}.merge(rack_env)
     rh = RatHole.new('127.0.0.1')
-    Rack::MockRequest.new(rh).get('/someuri', opts)
+    Rack::MockRequest.new(rh).get(uri, opts)
   end
 
-  def send_post_request(body='')
+  def send_post_request(body='', uri='/someuri')
     rh = RatHole.new('127.0.0.1')
-    Rack::MockRequest.new(rh).post('/someuri', {:lint=>true, :input=> body})
+    Rack::MockRequest.new(rh).post(uri, {:lint=>true, :input=> body})
   end
 
   def test_response_unchanged
@@ -158,6 +158,16 @@ class TestRatHole < Test::Unit::TestCase
     mock_server(:body => 'not testing this')
     send_get_request(rack_env)
     assert_equal(expected_headers, proxied_request.headers)
+  end
+
+  def test_request_uri
+    mock_server
+    send_get_request({}, '/uri?with=param')
+    assert_equal('/uri?with=param', proxied_request.uri)
+
+    mock_server
+    send_post_request('', '/uri?with=param')
+    assert_equal('/uri?with=param', proxied_request.uri)
   end
 
   def test_systemic_empty_rathole
