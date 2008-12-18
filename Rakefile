@@ -13,7 +13,8 @@ Hoe.new('rathole', RatHole::VERSION) do |p|
   p.extra_dev_deps << ['hpricot', '>= 0.6.164']
   p.extra_dev_deps << ['newgem', '>= 1.1.0']
   p.extra_dev_deps << ['cucumber', '>= 0.1.12']
-  p.author = 'Michael Hale'
+  p.author << 'Michael Hale'
+  p.author << 'David Bogus'
   p.email = 'mikehale@gmail.com'
 end
 

@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["David Bogus"]
+  s.authors = ["Michael Hale", "David Bogus"]
   s.date = %q{2008-12-17}
   s.description = %q{Rat Hole is a handy library for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server.  The name is inspired by why's mousehole[http://code.whytheluckystiff.net/mouseHole/]}
   s.email = %q{mikehale@gmail.com}
