@@ -6,7 +6,7 @@ require 'util'
 
 class RatHole
 
-  VERSION = '0.1.1'
+  VERSION = '0.1.2'
 
   def initialize(host)
     @host = host

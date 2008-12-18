@@ -1,7 +1,9 @@
 History.txt
 Manifest.txt
 README.rdoc
+Rakefile
 lib/rat_hole.rb
 lib/util.rb
-test/test_rat_hole.rb
+rat-hole.gemspec
 test/mock_request.rb
+test/test_rat_hole.rb
