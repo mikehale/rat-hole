@@ -20,7 +20,7 @@ You can also modify the response from the server to cleanup html tweak headers e
       rack_request
     end
 
-    def process_server_response(rack_response)
+    def process_server_response(rack_response, rack_request)
       # For any html pages proxied replace all links with http://ronpaul.com and 
       # add a Ron-Paul header.
 

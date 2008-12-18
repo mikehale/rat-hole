@@ -209,7 +209,7 @@ class TestRatHole < Test::Unit::TestCase
 end
 
 class PoliticalAgendaRatHole < RatHole
-  def process_server_response(rack_response)
+  def process_server_response(rack_response, rack_request)
     if(rack_response.content_type == 'text/html')
       doc = Hpricot(rack_response.body.first)
       (doc/"a").set('href', 'http://ronpaul.com')

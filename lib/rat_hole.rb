@@ -6,7 +6,7 @@ require 'util'
 
 class RatHole
 
-  VERSION = '0.1.3'
+  VERSION = '0.1.4'
 
   def initialize(host)
     @host = host
@@ -16,7 +16,7 @@ class RatHole
     rack_request
   end
 
-  def process_server_response(rack_response)
+  def process_server_response(rack_response, rack_request)
     rack_response
   end
 
@@ -44,7 +44,7 @@ class RatHole
       body = response.body || ''
       headers.delete('transfer-encoding')
 
-      process_server_response(Rack::Response.new(body, code, headers)).finish
+      process_server_response(Rack::Response.new(body, code, headers), source_request).finish
     end
   end
 
