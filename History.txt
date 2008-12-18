@@ -1,3 +1,7 @@
+=== 0.1.6 / 2008-12-18
+
+* properly calculate request_uri if query_string is empty
+
 === 0.1.5 / 2008-12-18
 
 * calculate request_uri = path_info + query_string

@@ -166,6 +166,10 @@ class TestRatHole < Test::Unit::TestCase
     assert_equal('/uri?with=param', proxied_request.uri)
 
     mock_server
+    send_get_request({}, '/uri')
+    assert_equal('/uri', proxied_request.uri)
+
+    mock_server
     send_post_request('', '/uri?with=param')
     assert_equal('/uri?with=param', proxied_request.uri)
   end

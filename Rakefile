@@ -18,6 +18,7 @@ Hoe.new('rat-hole', RatHole::VERSION) do |p|
   p.email = 'mikehale@gmail.com'
 end
 
+desc %(Update the gemspec so that github will build a new gem: http://gems.github.com/)
 task :update_gemspec do
   begin
     old_stdout = STDOUT.dup

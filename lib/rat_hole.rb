@@ -6,7 +6,7 @@ require 'util'
 
 class RatHole
 
-  VERSION = '0.1.5'
+  VERSION = '0.1.6'
 
   def initialize(host)
     @host = host
@@ -27,7 +27,12 @@ class RatHole
       env.delete('HTTP_ACCEPT_ENCODING')
       source_request = process_user_request(Rack::Request.new(env))
       source_headers = request_headers(source_request.env)
-      request_uri = "#{source_request.path_info}?#{source_request.query_string}"
+      
+      if source_request.query_string.nil? || source_request.query_string == ''
+        request_uri = source_request.path_info
+      else
+        request_uri = "#{source_request.path_info}?#{source_request.query_string}"
+      end
 
       if source_request.get?
         response = http.get(request_uri, source_headers)
