@@ -15,9 +15,6 @@ You can also modify the response from the server to cleanup html tweak headers e
   class PoliticalAgendaRatHole < RatHole
     def process_user_request(rack_request)
       # optionally munge the request before passing it to the old server
-      
-      # required to return the rack request
-      rack_request
     end
 
     def process_server_response(rack_response, rack_request)
@@ -37,13 +34,16 @@ You can also modify the response from the server to cleanup html tweak headers e
 
         rack_response.headers['Ron-Paul'] = 'wish I could have voted for this guy'
       end
-
-      # required to return the rack response
-      rack_response
     end
   end
 
-  app =  PoliticalAgendaRatHole.new('www.google.com')
+  app = Rack::Builder.new do
+    use Rack::CommonLogger # display apache style common logs
+    use Rack::ShowExceptions # show exceptions
+    use Rack::Reloader # reload app when an included file changes
+    run PoliticalAgendaRatHole.new('www.google.com')
+  end
+
   Rack::Handler::Mongrel.run(app, {:Host => 'localhost', :Port => 5001})
 
 == INSTALL:
@@ -53,14 +53,15 @@ You can also modify the response from the server to cleanup html tweak headers e
   User Request  --->
       ---  RatHoleProxy.process_user_request(rack_request) --->
                                                                 <==========> OLD SERVER
-      <---  RatHoleProxy.process_server_response(rack_response) ---
+      <---  RatHoleProxy.process_server_response(rack_response, rack_request) ---
   User Response  <---
 
 == TODO
-* add error handling
+* handle server down
 * handle gziped content (accept-encoding, transfer-encoding)
 * maybe use a pool of Net::HTTP connections to speed things up
 * provide an easy way for testing rat holes
+* write up some rathole's for common tasks
 
 == Credits
 * Michael Hale (http://halethegeek.com)

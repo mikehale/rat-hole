@@ -1,4 +1,4 @@
-$LOAD_PATH << File.join(File.dirname(__FILE__), 'lib')
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), 'lib')
 require 'rubygems'
 require 'hoe-patched' # because it supports README.*
 require 'rat_hole'

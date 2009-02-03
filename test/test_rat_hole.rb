@@ -1,4 +1,4 @@
-$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 
 require 'rubygems'
 require 'rr'
@@ -191,7 +191,12 @@ class TestRatHole < Test::Unit::TestCase
 
   def test_systemic_political_agenda
     host = 'terralien.com'
-    app =  PoliticalAgendaRatHole.new(host)
+    app = Rack::Builder.new do
+      use Rack::ShowExceptions
+      use Rack::ShowStatus
+      run PoliticalAgendaRatHole.new(host)
+    end
+    
     app_response = Rack::MockRequest.new(app).get('/', {})
     raw_response = Net::HTTP.start(host) do |http|
       http.get('/', {})
@@ -230,6 +235,5 @@ class PoliticalAgendaRatHole < RatHole
       rack_response.body.first.replace(doc.to_html)
       rack_response.headers['Ron-Paul'] = 'wish I could have voted for this guy'
     end
-    rack_response
   end
 end

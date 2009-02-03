@@ -25,7 +25,8 @@ class RatHole
       http.instance_eval{@socket = MethodSpy.new(@socket){|method| method =~ /#{ENV['RH_METHOD_SPY_FILTER']}/}} if $DEBUG
 
       env.delete('HTTP_ACCEPT_ENCODING')
-      source_request = process_user_request(Rack::Request.new(env))
+      source_request = Rack::Request.new(env)
+      process_user_request(source_request)
       source_headers = request_headers(source_request.env)
       
       if source_request.query_string.nil? || source_request.query_string == ''
@@ -50,7 +51,12 @@ class RatHole
       body = response.body || ''
       headers.delete('transfer-encoding')
 
-      process_server_response(Rack::Response.new(body, code, headers), source_request).finish
+      server_response = Rack::Response.new(body, code, headers)
+      process_server_response(server_response, source_request)
+      if server_response.headers.has_key?("content-length")
+        server_response.headers["content-length"] = server_response.headers["content-length"].first
+      end
+      server_response.finish
     end
   end
 
