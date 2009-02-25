@@ -3,13 +3,15 @@ require 'rubygems'
 require 'rack'
 require 'delegate'
 require 'util'
+require 'open3'
 
 class RatHole
 
   VERSION = '0.1.6'
 
-  def initialize(host)
+  def initialize(host, tidy=false)
     @host = host
+    @tidy = tidy
   end
 
   def process_user_request(rack_request)
@@ -49,6 +51,7 @@ class RatHole
       code = response.code.to_i
       headers = response.to_hash
       body = response.body || ''
+      body = tidy_html(body) if @tidy
       headers.delete('transfer-encoding')
 
       server_response = Rack::Response.new(body, code, headers)
@@ -58,6 +61,19 @@ class RatHole
       end
       server_response.finish
     end
+  end
+
+  def tidy_html(body)
+    if `which tidy` == ''
+      $stderr.puts "tidy not found in path"
+      return
+    end
+    tidied = Open3.popen3('tidy -ascii') do |stdin, stdout, stderr|
+      stdin.print body
+      stdin.close
+      stdout.read
+    end
+    body.replace(tidied)
   end
 
   def request_headers(env)
