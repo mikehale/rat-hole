@@ -1,3 +1,9 @@
+=== 0.1.7 / 2009-02-25
+
+* add support for tidy
+* update api to not require request/response to be returned
+* require rack 0.9.1 or greater
+
 === 0.1.6 / 2008-12-18
 
 * properly calculate request_uri if query_string is empty

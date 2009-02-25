@@ -8,7 +8,7 @@ Hoe.new('rat-hole', RatHole::VERSION) do |p|
   p.description = p.paragraphs_of('README.rdoc', 0...1).to_s
   p.url = 'http://github.com/mikehale/rat-hole'
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
-  p.extra_deps << ['rack', '>= 0.4.0']
+  p.extra_deps << ['rack', '>= 0.9.1']
   p.extra_dev_deps << ['rr', '>= 0.6.0']
   p.extra_dev_deps << ['hpricot', '>= 0.6.164']
   p.extra_dev_deps << ['newgem', '>= 1.1.0']
