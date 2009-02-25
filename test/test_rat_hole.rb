@@ -188,13 +188,13 @@ class TestRatHole < Test::Unit::TestCase
     assert_equal normalize_headers(raw_response.headers), normalize_headers(app_response.headers)
     assert_equal raw_response.body.to_s, app_response.body.to_s
   end
-
-  def test_systemic_political_agenda
-    host = 'terralien.com'
+  
+  
+  def through_the_rat_hole(rathole_klass, host)
     app = Rack::Builder.new do
       use Rack::ShowExceptions
       use Rack::ShowStatus
-      run PoliticalAgendaRatHole.new(host)
+      run rathole_klass.new(host)
     end
     
     app_response = Rack::MockRequest.new(app).get('/', {})
@@ -206,12 +206,25 @@ class TestRatHole < Test::Unit::TestCase
     raw_headers = normalize_headers(raw_response.headers)
     app_headers = normalize_headers(app_response.headers)
 
-    assert_equal raw_response.status.to_i, app_response.status.to_i
-    assert !raw_headers.has_key?('Ron-Paul')
-    assert app_headers.has_key?('Ron-Paul')
+    yield(raw_response, app_response, raw_headers, app_headers)
+  end
 
-    assert !raw_response.body.to_s.include?('http://ronpaul.com')
-    assert app_response.body.to_s.include?('http://ronpaul.com')
+# todo:
+# modify headers inline
+# provide test example in readme
+# move to rspec?
+# support post, head, delete, etc?
+# plugin your rathole
+
+  def test_systemic_political_agenda
+    through_the_rat_hole(PoliticalAgendaRatHole, 'terralien.com') do |raw_response, app_response, raw_headers, app_headers|
+      assert_equal raw_response.status.to_i, app_response.status.to_i
+      assert !raw_headers.has_key?('Ron-Paul')
+      assert app_headers.has_key?('Ron-Paul')
+
+      assert !raw_response.body.to_s.include?('http://ronpaul.com')
+      assert app_response.body.to_s.include?('http://ronpaul.com')
+    end
   end
 
   def normalize_headers(headers)
