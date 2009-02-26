@@ -3,6 +3,7 @@ Manifest.txt
 README.rdoc
 Rakefile
 lib/rat_hole.rb
+lib/rat_hole_test.rb
 lib/util.rb
 rat-hole.gemspec
 test/mock_request.rb

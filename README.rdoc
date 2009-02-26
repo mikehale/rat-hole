@@ -46,6 +46,20 @@ You can also modify the response from the server to cleanup html tweak headers e
 
   Rack::Handler::Mongrel.run(app, {:Host => 'localhost', :Port => 5001})
 
+=== Testing your RatHole into existance
+  class PoliticalAgendaRatHoleTest < RatHoleTest
+    def test_has_proper_response
+      through_the(PoliticalAgendaRatHole, 'terralien.com') do |raw_response, app_response|
+        assert_equal raw_response.status.to_i, app_response.status.to_i
+        assert !raw_response.headers.has_key?('Ron-Paul')
+        assert app_response.headers.has_key?('Ron-Paul')
+
+        assert !raw_response.body.to_s.include?('http://ronpaul.com')
+        assert app_response.body.to_s.include?('http://ronpaul.com')
+      end
+    end
+  end
+
 == INSTALL:
   * sudo gem install mikehale-rat-hole
 

@@ -1,5 +1,4 @@
 require 'net/http'
-require 'rubygems'
 require 'rack'
 require 'delegate'
 require 'util'

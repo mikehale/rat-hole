@@ -1,11 +1,10 @@
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 
-require 'rubygems'
 require 'rr'
 require 'delegate'
 require 'test/unit'
-require 'ruby-debug'
 require 'rat_hole'
+require 'rat_hole_test'
 require 'mock_request'
 require 'hpricot'
 
@@ -173,70 +172,29 @@ class TestRatHole < Test::Unit::TestCase
     send_post_request('', '/uri?with=param')
     assert_equal('/uri?with=param', proxied_request.uri)
   end
+end
 
-  def test_systemic_empty_rathole
-    host = 'halethegeek.com'
-    app =  EmptyRatHole.new(host)
-    app_response = Rack::MockRequest.new(app).get('/', {})
-    raw_response = Net::HTTP.start(host) do |http|
-      http.get('/', {})
-    end
-    # Wrap raw_response in Rack::Response to make things easier to work with.
-    raw_response = Rack::Response.new(raw_response.body, raw_response.code, raw_response.to_hash)
-
-    assert_equal raw_response.status.to_i, app_response.status.to_i
-    assert_equal normalize_headers(raw_response.headers), normalize_headers(app_response.headers)
-    assert_equal raw_response.body.to_s, app_response.body.to_s
-  end
-  
-  
-  def through_the_rat_hole(rathole_klass, host)
-    app = Rack::Builder.new do
-      use Rack::ShowExceptions
-      use Rack::ShowStatus
-      run rathole_klass.new(host)
-    end
-    
-    app_response = Rack::MockRequest.new(app).get('/', {})
-    raw_response = Net::HTTP.start(host) do |http|
-      http.get('/', {})
-    end
-    # Wrap raw_response in Rack::Response to make things easier to work with.
-    raw_response = Rack::Response.new(raw_response.body, raw_response.code, raw_response.to_hash)
-    raw_headers = normalize_headers(raw_response.headers)
-    app_headers = normalize_headers(app_response.headers)
-
-    yield(raw_response, app_response, raw_headers, app_headers)
-  end
-
-# todo:
-# modify headers inline
-# provide test example in readme
-# move to rspec?
-# support post, head, delete, etc?
-# plugin your rathole
-
-  def test_systemic_political_agenda
-    through_the_rat_hole(PoliticalAgendaRatHole, 'terralien.com') do |raw_response, app_response, raw_headers, app_headers|
+class TestEmptyRatHole < RatHoleTest
+  def test_has_proper_response
+    through_the(EmptyRatHole, 'halethegeek.com') do |raw_response, app_response|
+      assert_not_equal 0, raw_response.headers
       assert_equal raw_response.status.to_i, app_response.status.to_i
-      assert !raw_headers.has_key?('Ron-Paul')
-      assert app_headers.has_key?('Ron-Paul')
+      assert_equal raw_response.headers, app_response.headers
+      assert_equal raw_response.body.to_s, app_response.body.to_s
+    end
+  end
+end
+
+class PoliticalAgendaRatHoleTest < RatHoleTest
+  def test_has_proper_response
+    through_the(PoliticalAgendaRatHole, 'terralien.com') do |raw_response, app_response|
+      assert_equal raw_response.status.to_i, app_response.status.to_i
+      assert !raw_response.headers.has_key?('Ron-Paul')
+      assert app_response.headers.has_key?('Ron-Paul')
 
       assert !raw_response.body.to_s.include?('http://ronpaul.com')
       assert app_response.body.to_s.include?('http://ronpaul.com')
     end
-  end
-
-  def normalize_headers(headers)
-    headers.inject({}){|h,e|
-      k,v = e
-      # don't compare headers that change or that we remove
-      unless k =~ /cookie|transfer|date|runtime/i
-        v = [v] unless v.is_a? Array #normalize things
-        h.merge!(k => v)
-      end
-      h
-    }
   end
 end
 
