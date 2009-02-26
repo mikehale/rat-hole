@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Hale", "David Bogus"]
-  s.date = %q{2009-02-25}
+  s.date = %q{2009-02-26}
   s.description = %q{Rat Hole is a handy library for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server.}
   s.email = %q{mikehale@gmail.com}
   s.files = ["CHANGELOG.rdoc", "Manifest.txt", "README.rdoc", "VERSION.yml", "lib/rat_hole.rb", "lib/rat_hole_test.rb", "lib/util.rb", "test/mock_request.rb", "test/test_rat_hole.rb"]
