@@ -33,14 +33,13 @@ class String
 end
 
 module Net::HTTPHeader
-  alias :orig_to_hash :to_hash
-
   def to_hash
-    headers = orig_to_hash
-    headers.each do |k,v|
-      headers.delete(k)
-      headers[k.to_camel_case] = v
+    new_headers = @header.dup
+    @header.each do |k,v|
+      new_headers.delete(k)
+      new_headers[k.to_camel_case] = v
     end
+    new_headers
   end
 end
 

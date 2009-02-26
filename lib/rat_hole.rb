@@ -48,13 +48,13 @@ class RatHole
       headers.delete('Transfer-Encoding')
 
       server_response = Rack::Response.new(body, code, headers)
-      fix_headers(server_response)
+      whack_array(server_response)
       process_server_response(server_response, source_request)
       server_response.finish
     end
   end
 
-  def fix_headers(server_response)
+  def whack_array(server_response)
     server_response.headers.each do |k, v|
       if v.is_a?(Array) && v.size == 1
         server_response[k] = v.first
