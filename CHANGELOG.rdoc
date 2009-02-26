@@ -1,5 +1,7 @@
-= EDGE
+= 0.1.8
 
+* bug fixes
+* use jeweler instead of hoe
 * add test harness
 
 = 0.1.7
