@@ -53,9 +53,9 @@ class TestRatHole < Test::Unit::TestCase
     MockRequest.new(@io.written)
   end
 
-  def send_get_request(rack_env={}, uri='/someuri')
+  def send_get_request(rack_env={}, uri='/someuri', tidy=false)
     opts = {:lint=>true}.merge(rack_env)
-    rh = RatHole.new('127.0.0.1')
+    rh = RatHole.new('127.0.0.1', tidy)
     Rack::MockRequest.new(rh).get(uri, opts)
   end
 
@@ -181,6 +181,19 @@ class TestRatHole < Test::Unit::TestCase
     mock_server
     send_post_request('', '/uri?with=param')
     assert_equal('/uri?with=param', proxied_request.uri)
+  end
+  
+  def test_tidy_fails
+    body = '<something tidy <will </barf on'
+    mock_server(:body => body)
+    response = send_get_request({}, '/', true)
+    assert_equal(response.body, body)
+  end
+
+  def test_tidy_tidies
+    mock_server(:body => 'tidy me')
+    response = send_get_request({:lint=>false}, '/', true)
+    assert response.body =~ /html/i
   end
 end
 

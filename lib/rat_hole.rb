@@ -44,11 +44,12 @@ class RatHole
       code = response.code.to_i
       headers = response.to_hash
       body = response.body || ''
-      body = tidy_html(body) if @tidy
       headers.delete('Transfer-Encoding')
 
       server_response = Rack::Response.new(body, code, headers)
       whack_array(server_response)
+      tidy_html(body) if server_response["Content-Type"] =~ /text\/html/ && @tidy
+      
       process_server_response(server_response, source_request)
       server_response.finish
     end
@@ -67,12 +68,13 @@ class RatHole
       $stderr.puts "tidy not found in path"
       return
     end
-    tidied = Open3.popen3('tidy -ascii') do |stdin, stdout, stderr|
+    tidied, errors = Open3.popen3('tidy -ascii') do |stdin, stdout, stderr|
       stdin.print body
       stdin.close
-      stdout.read
+      [stdout.read, stderr.read]
     end
-    body.replace(tidied)
+    $stderr.puts errors if $DEBUG
+    body.replace(tidied) if tidied != ""
   end
 
   def request_headers(env)
