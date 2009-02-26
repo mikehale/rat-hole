@@ -7,6 +7,7 @@ require 'rat_hole'
 require 'rat_hole_test'
 require 'mock_request'
 require 'hpricot'
+require 'ruby-debug'
 
 class Test::Unit::TestCase
   include RR::Adapters::TestUnit
@@ -118,6 +119,16 @@ class TestRatHole < Test::Unit::TestCase
     mock_server
     send_get_request({"HTTP_X_FORWARDED_HOST"=>"www.example.com", "NON_HTTP_HEADER" => '42'})
     assert_equal(expected_headers, proxied_request.headers)
+  end
+
+  def test_content_type
+    mock_server(:headers=>{'content-type' => ['image/gif']})
+    response = send_get_request
+    assert_equal 'image/gif', response.headers['Content-Type']
+
+    mock_server
+    response = send_get_request
+    assert_equal 'text/html', response.headers['Content-Type']
   end
 
   def test_convert_rack_env_to_http_headers_more_data

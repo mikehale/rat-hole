@@ -1,16 +1,16 @@
 require 'test/unit'
 
 class RatHoleTest < Test::Unit::TestCase
-  def through_the(rathole_klass, host)
+  def through_the(rathole_klass, host, uri='/', headers={})
     app = Rack::Builder.new do
       use Rack::ShowExceptions
       use Rack::ShowStatus
       run rathole_klass.new(host)
     end
 
-    app_response = Rack::MockRequest.new(app).get('/', {})
+    app_response = Rack::MockRequest.new(app).get(uri, headers)
     raw_response = Net::HTTP.start(host) do |http|
-      http.get('/', {})
+      http.get(uri, headers)
     end
     # Wrap raw_response in Rack::Response to make things easier to work with.
     raw_response = Rack::Response.new(raw_response.body, raw_response.code, raw_response.to_hash)

@@ -22,7 +22,6 @@ class RatHole
   def call(env)
     Net::HTTP.start(@host) do |http|
       http.instance_eval{@socket = MethodSpy.new(@socket){|method| method =~ /#{ENV['RH_METHOD_SPY_FILTER']}/}} if $DEBUG
-
       env.delete('HTTP_ACCEPT_ENCODING')
       source_request = Rack::Request.new(env)
       process_user_request(source_request)
@@ -52,12 +51,18 @@ class RatHole
       headers.delete('transfer-encoding')
 
       server_response = Rack::Response.new(body, code, headers)
+      fix_content_type(server_response, headers)
       process_server_response(server_response, source_request)
       if server_response.headers.has_key?("content-length")
         server_response.headers["content-length"] = server_response.headers["content-length"].first
       end
       server_response.finish
     end
+  end
+  
+  def fix_content_type(response, headers)
+    content_type = headers["content-type"]
+    response["Content-Type"] = content_type if content_type && !content_type.first.include?('text')
   end
 
   def tidy_html(body)
