@@ -32,7 +32,19 @@ class String
   end
 end
 
-module HTTPHeaderPatch
+module Net::HTTPHeader
+  alias :orig_to_hash :to_hash
+
+  def to_hash
+    headers = orig_to_hash
+    headers.each do |k,v|
+      headers.delete(k)
+      headers[k.to_camel_case] = v
+    end
+  end
+end
+
+class Net::HTTP::Post
   # handle multiple parameters with the same name
   def form_data=(params, sep = '&')
     self.body = params.map {|key,value|

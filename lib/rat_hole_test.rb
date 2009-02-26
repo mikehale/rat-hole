@@ -13,19 +13,21 @@ class RatHoleTest < Test::Unit::TestCase
       http.get(uri, headers)
     end
     # Wrap raw_response in Rack::Response to make things easier to work with.
-    raw_response = Rack::Response.new(raw_response.body, raw_response.code, raw_response.to_hash)
+    raw_headers = raw_response.to_hash
+    raw_response = Rack::Response.new(raw_response.body, raw_response.code, raw_headers)
     normalize_headers(raw_response.headers)
     normalize_headers(app_response.headers)
-
     yield(raw_response, app_response)
   end
 
   def normalize_headers(headers)
     new_headers = headers.inject({}){|h,e|
       k,v = e
-      # remove headers that change or that we remove
-      unless k =~ /cookie|transfer|date|runtime|last-modified/i
-        v = [v] unless v.is_a? Array #normalize things
+      # the value of these headers changes
+      v = nil if k =~ /cookie|date|runtime|last-modified/i
+      # skip headers that rat-hole removes
+      unless k =~ /transfer/i
+        v = v.first if v.is_a?(Array) && v.size == 1 #normalize things
         h.merge!(k => v)
       end
       h
@@ -33,6 +35,6 @@ class RatHoleTest < Test::Unit::TestCase
     headers.replace(new_headers)
   end
 
-  def test_nothing
+  def test_nothing #make autotest happy
   end
 end

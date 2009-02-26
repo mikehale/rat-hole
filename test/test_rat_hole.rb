@@ -7,7 +7,6 @@ require 'rat_hole'
 require 'rat_hole_test'
 require 'mock_request'
 require 'hpricot'
-require 'ruby-debug'
 
 class Test::Unit::TestCase
   include RR::Adapters::TestUnit
@@ -211,7 +210,7 @@ end
 
 class PoliticalAgendaRatHole < RatHole
   def process_server_response(rack_response, rack_request)
-    if(rack_response.content_type == 'text/html')
+    if(rack_response.content_type =~ /text\/html/)
       doc = Hpricot(rack_response.body.first)
       (doc/"a").set('href', 'http://ronpaul.com')
       rack_response.body.first.replace(doc.to_html)

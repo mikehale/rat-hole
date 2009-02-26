@@ -37,9 +37,6 @@ class RatHole
         response = http.get(request_uri, source_headers)
       elsif source_request.post?
         post = Net::HTTP::Post.new(request_uri, source_headers)
-        class << post
-          include HTTPHeaderPatch
-        end
         post.form_data = source_request.POST
         response = http.request(post)
       end
@@ -48,21 +45,21 @@ class RatHole
       headers = response.to_hash
       body = response.body || ''
       body = tidy_html(body) if @tidy
-      headers.delete('transfer-encoding')
+      headers.delete('Transfer-Encoding')
 
       server_response = Rack::Response.new(body, code, headers)
-      fix_content_type(server_response, headers)
+      fix_headers(server_response)
       process_server_response(server_response, source_request)
-      if server_response.headers.has_key?("content-length")
-        server_response.headers["content-length"] = server_response.headers["content-length"].first
-      end
       server_response.finish
     end
   end
-  
-  def fix_content_type(response, headers)
-    content_type = headers["content-type"]
-    response["Content-Type"] = content_type if content_type && !content_type.first.include?('text')
+
+  def fix_headers(server_response)
+    server_response.headers.each do |k, v|
+      if v.is_a?(Array) && v.size == 1
+        server_response[k] = v.first
+      end
+    end
   end
 
   def tidy_html(body)
