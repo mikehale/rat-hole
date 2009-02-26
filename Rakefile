@@ -9,8 +9,8 @@ begin
     s.homepage = "http://github.com/mikehale/rat-hole"
     s.description = "Rat Hole is a handy library for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server."
     s.authors = ["Michael Hale", "David Bogus"]
-    s.files = FileList['lib/**/*.rb', 'bin/*', '[A-Z]*', 'test/**/*', '*.gemspec'].to_a
-    s.dependencies << ['rack', '>= 0.9.1']
+    s.add_dependency('rack', '>= 0.9.1')
+    s.has_rdoc = false
     # s.extra_dev_deps << ['rr', '>= 0.6.0']
     # s.extra_dev_deps << ['hpricot', '>= 0.6.164']
     # s.extra_dev_deps << ['newgem', '>= 1.1.0']
