@@ -35,11 +35,4 @@ class RatHoleTest < Test::Unit::TestCase
 
   def test_nothing
   end
-  # todo:
-  # provide test example in readme
-  # move to rspec?
-  # support post, head, delete, etc?
-  # use jewler instead of hoe
-  # add caching? can apache do this for us?
-  
 end

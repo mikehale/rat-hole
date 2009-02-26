@@ -1,25 +1,29 @@
-=== 0.1.7 / 2009-02-25
+= EDGE
+
+* add test harness
+
+= 0.1.7
 
 * add support for tidy
 * update api to not require request/response to be returned
 * require rack 0.9.1 or greater
 
-=== 0.1.6 / 2008-12-18
+= 0.1.6
 
 * properly calculate request_uri if query_string is empty
 
-=== 0.1.5 / 2008-12-18
+= 0.1.5
 
 * calculate request_uri = path_info + query_string
 
-=== 0.1.4 / 2008-12-18
+= 0.1.4
 
 * update process_server_response hook to include rack_request
 
-=== 0.1.2 / 2008-12-17
+= 0.1.2
 
 * use patched-hoe from newgem
 
-=== 0.1.0 / 2008-12-17
+= 0.1.0
 
 * First release.

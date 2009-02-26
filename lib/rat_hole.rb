@@ -6,8 +6,6 @@ require 'open3'
 
 class RatHole
 
-  VERSION = '0.1.7'
-
   def initialize(host, tidy=false)
     @host = host
     @tidy = tidy

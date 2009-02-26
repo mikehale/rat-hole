@@ -74,8 +74,10 @@ You can also modify the response from the server to cleanup html tweak headers e
 * handle server down
 * handle gziped content (accept-encoding, transfer-encoding)
 * maybe use a pool of Net::HTTP connections to speed things up
-* provide an easy way for testing rat holes
-* write up some rathole's for common tasks
+* write up some rathole's for common tasks (logging)
+* move to rspec?
+* support post, head, delete, etc?
+* add caching? can apache do this for us?
 
 == Credits
 * Michael Hale (http://halethegeek.com)

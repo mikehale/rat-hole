@@ -1,29 +1,57 @@
-$LOAD_PATH.unshift File.join(File.dirname(__FILE__), 'lib')
-require 'hoe-patched' # because it supports README.*
-require 'rat_hole'
+require 'rake'
 
-Hoe.new('rat-hole', RatHole::VERSION) do |p|
-  p.summary = 'Rack compliant proxy'
-  p.description = p.paragraphs_of('README.rdoc', 0...1).to_s
-  p.url = 'http://github.com/mikehale/rat-hole'
-  p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
-  p.extra_deps << ['rack', '>= 0.9.1']
-  p.extra_dev_deps << ['rr', '>= 0.6.0']
-  p.extra_dev_deps << ['hpricot', '>= 0.6.164']
-  p.extra_dev_deps << ['newgem', '>= 1.1.0']
-  p.extra_dev_deps << ['cucumber', '>= 0.1.12']
-  p.author << 'Michael Hale'
-  p.author << 'David Bogus'
-  p.email = 'mikehale@gmail.com'
-end
-
-desc %(Update the gemspec so that github will build a new gem: http://gems.github.com/)
-task :update_gemspec do
-  begin
-    old_stdout = STDOUT.dup
-    STDOUT.reopen('rat-hole.gemspec')
-    Rake::Task["debug_gem"].invoke
-  ensure
-    STDOUT.reopen(old_stdout)
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |s|
+    s.name = "rat-hole"
+    s.summary = 'Rack compliant http proxy'
+    s.email = "mikehale@gmail.com"
+    s.homepage = "http://github.com/mikehale/rat-hole"
+    s.description = "Rat Hole is a handy library for creating a rack compliant http proxy that allows you to modify the request from the user and the response from the server."
+    s.authors = ["Michael Hale", "David Bogus"]
+    s.files = FileList['lib/**/*.rb', 'bin/*', '[A-Z]*', 'test/**/*', '*.gemspec'].to_a
+    s.dependencies << ['rack', '>= 0.9.1']
+    # s.extra_dev_deps << ['rr', '>= 0.6.0']
+    # s.extra_dev_deps << ['hpricot', '>= 0.6.164']
+    # s.extra_dev_deps << ['newgem', '>= 1.1.0']
+    # s.extra_dev_deps << ['cucumber', '>= 0.1.12']
   end
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
+
+require 'rake/rdoctask'
+Rake::RDocTask.new do |rdoc|
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = 'rat-hole'
+  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+require 'rake/testtask'
+Rake::TestTask.new(:test) do |t|
+  t.libs << 'lib' << 'test'
+  t.pattern = 'test/**/test_*.rb'
+  t.verbose = false
+end
+
+begin
+  require 'rcov/rcovtask'
+  Rcov::RcovTask.new do |t|
+    t.libs << 'test'
+    t.test_files = FileList['test/**/*_test.rb']
+    t.verbose = true
+  end
+rescue LoadError
+  puts "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov"
+end
+
+begin
+  require 'cucumber/rake/task'
+  Cucumber::Rake::Task.new(:features)
+rescue LoadError
+  puts "Cucumber is not available. In order to run features, you must: sudo gem install cucumber"
+end
+
+task :default => :test
